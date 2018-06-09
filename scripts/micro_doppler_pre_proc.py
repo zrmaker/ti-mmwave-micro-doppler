@@ -29,7 +29,7 @@ class micro_doppler_signature_proc:
         for msg in self.bag.read_messages(topics=['/ti_mmwave/micro_doppler']):
             msg_handle = msg.message
             mds_array = np.array(msg_handle.micro_doppler_array).reshape((nd, time_domain_bins))
-            mds_array[int(nd/2),] = 0
+            # mds_array[int(nd/2),] = 0
             mds_show = np.append(mds_show, np.vstack(mds_array[:,-1]), axis = 1)
         plt.imshow(mds_show)
         plt.colorbar()
@@ -42,7 +42,7 @@ class micro_doppler_signature_proc:
             time_domain_bins = msg_handle.time_domain_bins
             nd = msg_handle.num_chirps
             mds_array = np.array(msg_handle.micro_doppler_array).reshape((nd, time_domain_bins))
-            mds_array[int(nd/2),] = 0
+            # mds_array[int(nd/2),] = 0
             plt.imshow(mds_array)
             plt.pause(.00001)
 
@@ -54,17 +54,19 @@ class micro_doppler_signature_proc:
             break
         self.x = np.empty((0,time_domain_bins*nd), float)
         self.y = []
-        # print(self.x.shape)
         for msg in self.bag.read_messages(topics=['/ti_mmwave/micro_doppler']):
             msg_handle = msg.message
             mds_array = np.array(msg_handle.micro_doppler_array).reshape((nd, time_domain_bins))
-            mds_array[int(nd/2),] = 0
+            # mds_array[int(nd/2),] = 0
             self.x = np.append(self.x, mds_array.reshape((1,-1)), axis = 0)
             self.y = np.append(self.y, self.label)
         print(self.x.shape,'\n',self.y)
         np.savetxt(self.csv_name_x, self.x, delimiter=",")
         np.savetxt(self.csv_name_y, self.y, delimiter=",")
         
+    def main(self):
+        self.save_to_csv()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='bag & label')
     parser.add_argument(
@@ -86,6 +88,5 @@ if __name__ == '__main__':
     label = vars(args)['label']
     # micro_doppler_signature_proc(bag, label).read_plot_mds_all()
     # micro_doppler_signature_proc(bag, label).read_plot_mds_array()
-    micro_doppler_signature_proc(bag, label).save_to_csv()
-    
-    
+    # micro_doppler_signature_proc(bag, label).save_to_csv()
+    micro_doppler_signature_proc(bag, label).main()
